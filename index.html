@@ -792,9 +792,7 @@
     };
  
     // Initialize EmailJS (only if configured)
-    if (EMAILJS_CONFIG.publicKey !== '1oPV57bv9QCitwXrv') {
       emailjs.init(EMAILJS_CONFIG.publicKey);
-    }
  
     const notifyForm = document.getElementById('notifyForm');
     const emailInput = document.getElementById('emailInput');
@@ -847,18 +845,12 @@
       notifyBtn.disabled = true;
       notifyBtn.innerHTML = '<span class="spinner"></span> Sending...';
  
-      try {
-        if (EMAILJS_CONFIG.publicKey !== '1oPV57bv9QCitwXrv') {
+      try { 
           // LIVE MODE: sends a real email via EmailJS
           await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
             user_email: email,
             signup_date: new Date().toLocaleString()
           });
-        } else {
-          // DEMO MODE: simulates a delay (remove once EmailJS is configured)
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          console.log('DEMO MODE — would notify you about:', email);
-        }
  
         // Save email to prevent duplicate signups
         signups.push(email);

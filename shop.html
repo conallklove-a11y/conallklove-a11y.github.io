@@ -1,1 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — Keep It Up</title>
+  <meta name="description" content="Get notified when Keep It Up launches — everything you need to play, in one box.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@400;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    :root {
+      --pink: #FF3C8E; --pink-light: #FF6FB0;
+      --blue: #00B4E6; --blue-dark: #0090BD; --blue-light: #7DD8F5;
+      --black: #111111; --dark: #1A1A2E; --white: #FFFFFF;
+      --off-white: #F8F9FC; --gray: #6B7280; --gray-light: #E5E7EB;
+      --success: #10B981; --error: #EF4444;
+      --font-display: 'Anybody', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-md: 0 8px 30px rgba(0,0,0,0.12);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+      --radius: 16px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-body); color: var(--black); background: var(--white); line-height: 1.6; overflow-x: hidden; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
+    /* TOAST */
+    .toast-container { position: fixed; top: 100px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+    .toast { padding: 16px 24px; border-radius: var(--radius-sm); color: var(--white); font-weight: 600; font-size: 0.95rem; box-shadow: var(--shadow-md); animation: toastIn 0.4s ease forwards, toastOut 0.4s ease 3.5s forwards; display: flex; align-items: center; gap: 10px; max-width: 380px; }
+    .toast-success { background: var(--success); }
+    .toast-error { background: var(--error); }
+    .toast-info { background: var(--blue); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); box-shadow: var(--shadow-sm); padding: 16px 0; }
+    .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; text-decoration: none; color: var(--black); text-transform: uppercase; letter-spacing: 1px; }
+    .logo span { color: var(--pink); }
+    .nav-links { display: flex; list-style: none; gap: 36px; }
+    .nav-links a { text-decoration: none; color: var(--black); font-weight: 600; font-size: 0.95rem; transition: color 0.3s ease; position: relative; }
+    .nav-links a:hover, .nav-links a.active { color: var(--pink); }
+    .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--pink); transition: width 0.3s ease; }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+    .nav-toggle span { display: block; width: 26px; height: 3px; background: var(--black); border-radius: 3px; }
+
+    /* PAGE HERO */
+    .page-hero { padding: 140px 0 80px; background: var(--off-white); text-align: center; }
+    .section-tag { display: inline-block; font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 3px; color: var(--pink); margin-bottom: 16px; }
+    .page-hero h1 { font-family: var(--font-display); font-size: 3.5rem; font-weight: 900; text-transform: uppercase; line-height: 1.1; margin-bottom: 16px; }
+    .page-hero p { font-size: 1.15rem; color: var(--gray); max-width: 560px; margin: 0 auto; }
+
+    /* SHOP SECTION */
+    .shop-section { padding: 80px 0; background: var(--white); }
+    .pricing-card { max-width: 520px; margin: 0 auto; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); border: 2px solid var(--gray-light); transition: all 0.3s ease; }
+    .pricing-card:hover { border-color: var(--pink); }
+    .pricing-card-image { width: 100%; height: 280px; background: linear-gradient(135deg, #e8f4fd 0%, #fce4ec 100%); display: flex; justify-content: center; align-items: center; font-size: 5rem; }
+    .pricing-card-body { padding: 36px; text-align: center; }
+    .pricing-card-body h3 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+    .pricing-card-body .price { font-family: var(--font-display); font-size: 2.5rem; font-weight: 900; color: var(--pink); margin-bottom: 8px; }
+    .pricing-card-body .price-note { font-size: 0.9rem; color: var(--gray); margin-bottom: 20px; }
+    .pricing-features { list-style: none; margin-bottom: 28px; text-align: left; }
+    .pricing-features li { padding: 8px 0; color: var(--black); font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
+    .pricing-features li::before { content: '\2713'; color: var(--blue); font-weight: 700; font-size: 1.1rem; }
+    .notify-form-wrapper { margin-top: 8px; border-top: 1px solid var(--gray-light); padding-top: 24px; }
+    .notify-form-wrapper h4 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+    .notify-form-wrapper .form-subtitle { font-size: 0.85rem; color: var(--gray); margin-bottom: 16px; }
+    .notify-form { display: flex; gap: 10px; }
+    .notify-form input[type="email"] { flex: 1; padding: 14px 18px; border: 2px solid var(--gray-light); border-radius: 60px; font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: border-color 0.3s ease; }
+    .notify-form input[type="email"]:focus { border-color: var(--blue); }
+    .notify-form input[type="email"].input-error { border-color: var(--error); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 16px 36px; border-radius: 60px; font-family: var(--font-body); font-weight: 700; font-size: 1rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.3s ease; }
+    .btn-primary { background: linear-gradient(135deg, var(--pink) 0%, var(--pink-light) 100%); color: var(--white); box-shadow: 0 8px 30px rgba(255,60,142,0.35); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,60,142,0.5); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .notify-form .btn { white-space: nowrap; padding: 14px 28px; }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--white); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .form-error-msg { color: var(--error); font-size: 0.8rem; margin-top: 8px; min-height: 20px; }
+    .signup-count { font-size: 0.85rem; color: var(--gray); margin-top: 12px; }
+    .signup-count strong { color: var(--pink); }
+
+    /* FOOTER */
+    footer { background: var(--black); color: rgba(255,255,255,0.6); padding: 48px 0 32px; }
+    .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { font-family: var(--font-display); font-size: 1.3rem; font-weight: 900; color: var(--white); text-transform: uppercase; }
+    .footer-logo span { color: var(--pink); }
+    .footer-links { display: flex; list-style: none; gap: 24px; }
+    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease; }
+    .footer-links a:hover { color: var(--white); }
+    .footer-bottom { text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; }
+
+    .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .nav-toggle { display: flex; }
+      .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: var(--white); padding: 24px; gap: 20px; box-shadow: var(--shadow-md); }
+      .nav-links.active { display: flex; }
+      .page-hero h1 { font-size: 2.5rem; }
+      .notify-form { flex-direction: column; }
+      .notify-form .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">Keep It <span>Up</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="how-to-play.html">How to Play</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="section-tag">Shop</div>
+      <h1>Grab Your Set</h1>
+      <p>Everything you need to start playing, in one box.</p>
+    </div>
+  </div>
+
+  <section class="shop-section">
+    <div class="container">
+      <div class="pricing-card fade-in">
+        <div class="pricing-card-image">&#127950;</div>
+        <div class="pricing-card-body">
+          <h3>The Starter Set</h3>
+          <div class="price">Coming Soon</div>
+          <div class="price-note">Price announced at launch</div>
+          <ul class="pricing-features">
+            <li>Keep It Up game table</li>
+            <li>Official game ball</li>
+            <li>Carrying bag</li>
+            <li>Rulebook &amp; tips guide</li>
+            <li>Free shipping in the US</li>
+          </ul>
+          <div class="notify-form-wrapper">
+            <h4>&#128276; Be First to Know</h4>
+            <p class="form-subtitle">Drop your email and we'll notify you the moment we launch.</p>
+            <form id="notifyForm" class="notify-form">
+              <input type="email" id="emailInput" placeholder="your@email.com" required autocomplete="email" aria-label="Email address">
+              <button type="submit" class="btn btn-primary" id="notifyBtn">Notify Me</button>
+            </form>
+            <div class="form-error-msg" id="formError"></div>
+            <div class="signup-count" id="signupCount"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">Keep It <span>Up</span></div>
+        <ul class="footer-links">
+          <li><a href="how-to-play.html">How to Play</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">&copy; 2026 Keep It Up. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      const icons = { success: '✓', error: '✕', info: 'ℹ' };
+      toast.innerHTML = `<span>${icons[type]}</span> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+    navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
+
+    const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.15 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    const EMAILJS_CONFIG = {
+      publicKey:  '1oPV57bv9QCitwXrv',
+      serviceId:  'service_8lga2c3',
+      templateId: 'template_4kh3fin'
+    };
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+
+    const notifyForm = document.getElementById('notifyForm');
+    const emailInput = document.getElementById('emailInput');
+    const notifyBtn = document.getElementById('notifyBtn');
+    const formError = document.getElementById('formError');
+    const signupCount = document.getElementById('signupCount');
+
+    function isValidEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+    function updateSignupCount() {
+      const signups = JSON.parse(localStorage.getItem('kiu_signups') || '[]');
+      if (signups.length > 0) {
+        signupCount.innerHTML = `<strong>${signups.length}</strong> ${signups.length === 1 ? 'person has' : 'people have'} signed up for launch updates`;
+      }
+    }
+    updateSignupCount();
+
+    notifyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      formError.textContent = '';
+      emailInput.classList.remove('input-error');
+      if (!email) { formError.textContent = 'Please enter your email address.'; emailInput.classList.add('input-error'); return; }
+      if (!isValidEmail(email)) { formError.textContent = "Hmm, that doesn't look like a valid email."; emailInput.classList.add('input-error'); return; }
+      const signups = JSON.parse(localStorage.getItem('kiu_signups') || '[]');
+      if (signups.includes(email)) { showToast("You're already on the list! We'll be in touch.", 'info'); return; }
+      notifyBtn.disabled = true;
+      notifyBtn.innerHTML = '<span class="spinner"></span> Sending...';
+      try {
+        await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, { user_email: email, signup_date: new Date().toLocaleString() });
+        signups.push(email);
+        localStorage.setItem('kiu_signups', JSON.stringify(signups));
+        showToast("You're on the list! We'll email you at launch.", 'success');
+        emailInput.value = '';
+        updateSignupCount();
+      } catch (error) {
+        console.error('EmailJS error:', error);
+        showToast('Something went wrong. Please try again.', 'error');
+      } finally {
+        notifyBtn.disabled = false;
+        notifyBtn.innerHTML = 'Notify Me';
+      }
+    });
+  </script>
+</body>
+</html>
